@@ -6,4 +6,4 @@ email  tools@inetsoftware.de
 date   2009-03-16
 name   Page Templater Plugin
 desc   Select Template Pages for your Content.
-url    http://www.inetsoftware.de/other-products/dokuwiki-plugins/page-templater
+url    https://github.com/i-net-software/dokuwiki-plugin-pagetemplater
