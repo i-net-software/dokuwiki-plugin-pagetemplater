@@ -63,7 +63,7 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 			if ( $new != $template ) { $template = $new; }
 			if ( $key != 'content' && substr($key, 0, 1) == '!' ) {
 				$rkey = substr($key, 1);
-				$replace[$key] = $this->plugin_render($replace[$key]);
+				$replace[$key] = p_render('xhtml', p_get_instructions($replace[$key]),$info);
 			} else { $rkey = $key; }
 			$new = str_replace('@@' . strtoupper(trim($rkey)) . '@@', $replace[$key], $template);
 		}
