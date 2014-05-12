@@ -50,7 +50,7 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 		if (!$namespace && empty($INFO['meta']['templater']['page'])) { return; }
 		
 		// check for the template
-		$template = p_wiki_xhtml(empty ($INFO['meta']['templater']['page']) ? $this->getConf('templater_page') : $INFO['meta']['templater']['page'],'',false);
+		$template = p_wiki_xhtml(empty ($INFO['meta']['templater']['page']) ? resolve_id($namespace, $this->getConf('templater_page')) : $INFO['meta']['templater']['page'],'',false);
 		if ( !$template ) { return; }
 
 		// set the replacements
