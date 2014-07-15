@@ -29,12 +29,12 @@ class syntax_plugin_pagetemplater extends DokuWiki_Syntax_Plugin {
         $this->Lexer->addSpecialPattern('@@CONTENT@@', $mode, 'plugin_pagetemplater');
     }
 
-    function handle($match, $state, $pos, &$handler) {
+    function handle($match, $state, $pos, Doku_Handler $handler) {
 
 		return true;
     }            
 	
-    function render($mode, &$renderer, $data) {
+    function render($mode, Doku_Renderer $renderer, $data) {
 		$renderer->doc .= "@@CONTENT@@";
 		return true;
 	}
