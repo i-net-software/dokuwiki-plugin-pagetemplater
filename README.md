@@ -1,7 +1,7 @@
 # Page Templater - Embed your page
 
 
-The News Page of i-net software uses the blog plugin. The blog entries always have a plain look - unless you define some style for them, e.g. using boxes. Using Page Templater you can define templates for the blog namespaces. In our case, we have added a template for news entries which includes the archive.
+This is a [DokuWiki](http://www.dokuwiki.org) plugin. The News Page of [i-net software](https://www.inetsoftware.de/support/news) uses the blog plugin. The blog entries always have a plain look - unless you define some style for them, e.g. using boxes. Using Page Templater you can define templates for the blog namespaces. In our case, we have added a template for news entries which includes the archive.
 You can also use the META plugin and define a template for only one page:
 
 ```
