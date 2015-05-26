@@ -23,7 +23,7 @@ class syntax_plugin_pagetemplater extends DokuWiki_Syntax_Plugin {
 
     function getType() { return 'substition'; }
     function getPType() { return 'block'; }
-    function getSort() { return 300; }
+    function getSort() { return 30; }
 
     function connectTo($mode) {
         $this->Lexer->addSpecialPattern('@@CONTENT@@', $mode, 'plugin_pagetemplater');
