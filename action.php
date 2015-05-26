@@ -66,6 +66,7 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 				$replace[$key] = p_render('xhtml', p_get_instructions($replace[$key]),$info);
 			} else { $rkey = $key; }
 			$new = str_replace('@@' . strtoupper(trim($rkey)) . '@@', $replace[$key], $template);
+			$new = str_replace(urlencode('@@') . strtoupper(trim($rkey)) . urlencode('@@'), $replace[$key], $new);
 		}
 		
 		if ( $new != $event->data ) {
