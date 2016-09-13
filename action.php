@@ -37,21 +37,17 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
      */
     function register(Doku_Event_Handler $controller) {
         $controller->register_hook('TPL_CONTENT_DISPLAY', 'BEFORE', $this, 'handle_content_display', array ());
+        $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'handle_meta_data', array ());
     }
 
     function handle_content_display(& $event, $params) {
-		global $ACT, $INFO;
+		global $ACT, $INFO, $TOC;
 		
-		if ( $ACT != 'show' )
-			return;
-			
-		// are we in an avtive Namespace?
-		$namespace = $this->_getActiveNamespace();
-		if (!$namespace && empty($INFO['meta']['templater']['page'])) { return; }
+		$template = $this->resolve_template();
+		if ( !$template || $ACT != 'show' ) { return; }
 		
-		// check for the template
-		$template = p_wiki_xhtml(empty ($INFO['meta']['templater']['page']) ? resolve_id($namespace, $this->getConf('templater_page')) : $INFO['meta']['templater']['page'],'',false);
-		if ( !$template ) { return; }
+		$oldtoc = $TOC;
+		$template = p_wiki_xhtml( $template );
 
 		// set the replacements
 		$replace = $INFO['meta']['templater'];
@@ -72,8 +68,42 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 		if ( $new != $event->data ) {
 			$event->data = $new;
 		}
+		
+		$TOC = $oldtoc;
+
+		$data = array('xhtml',& $event->data);
+        trigger_event('RENDERER_CONTENT_POSTPROCESS',$data);
+				
+		return true;
+    }
+    
+    function handle_meta_data(& $event, $params) {
+		global $INFO, $ID, $TOC;
+		
+		$template = $this->resolve_template();
+		if ( empty( $template) || $template == $event->data['page'] ) { return true; }
+		
+		$data = p_get_metadata( $template, 'internal' );
+        $INFO['meta']['internal'] = array_merge($INFO['meta']['internal'], $data);
+        p_set_metadata( $ID, 'internal', $INFO['meta']['internal']);
+
+		$data = p_get_metadata( $template, 'toc' );
+		$INFO['meta']['toc'] = is_array($INFO['meta']['toc']) ? $INFO['meta']['toc'] : [];
+        $INFO['meta']['toc'] = array_merge($INFO['meta']['toc'], $data);
+        p_set_metadata( $ID, 'toc', $INFO['meta']['toc']);
 
 		return true;
+    }
+
+    private function resolve_template() {
+		global $INFO;
+		
+		// are we in an avtive Namespace?
+		$namespace = $this->_getActiveNamespace();
+		if (!$namespace && empty($INFO['meta']['templater']['page'])) { return; }
+		
+		// check for the template
+		return empty ($INFO['meta']['templater']['page']) ? resolve_id($namespace, $this->getConf('templater_page')) : $INFO['meta']['templater']['page'];
     }
     
     function _getActiveNamespace() {
