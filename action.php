@@ -37,7 +37,7 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
      */
     function register(Doku_Event_Handler $controller) {
         $controller->register_hook('TPL_CONTENT_DISPLAY', 'BEFORE', $this, 'handle_content_display', array ());
-        $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'handle_meta_data', array ());
+        $controller->register_hook('PARSER_METADATA_RENDER', 'AFTER', $this, 'handle_meta_data', array ());
     }
 
     function handle_content_display(& $event, $params) {
@@ -78,40 +78,52 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
     }
     
     function handle_meta_data(& $event, $params) {
-		global $INFO, $ID, $TOC;
-		
-		$template = $this->resolve_template();
-		if ( empty( $template) || $template == $event->data['page'] ) { return true; }
-		
-		$data = p_get_metadata( $template, 'internal' );
-        $INFO['meta']['internal'] = array_merge($INFO['meta']['internal'], $data);
-        p_set_metadata( $ID, 'internal', $INFO['meta']['internal']);
+		global $ACT;
 
-		$data = p_get_metadata( $template, 'toc' );
-		$INFO['meta']['toc'] = is_array($INFO['meta']['toc']) ? $INFO['meta']['toc'] : [];
-        $INFO['meta']['toc'] = array_merge($INFO['meta']['toc'], $data);
-        p_set_metadata( $ID, 'toc', $INFO['meta']['toc']);
+        $id = getId();
+        if ( $id != $event->data['page'] ) { return true; }
+		$template = $this->resolve_template( $event->data['current']['templater'] );
+		if ( empty( $template) || in_array($template, array( $id, $event->data['page']) ) ) { return true; }
 
+        $meta = p_get_metadata( $template, '', METADATA_RENDER_UNLIMITED );
+        $event->data['current']['internal'] = array_merge($event->data['current']['internal'], $meta['internal']);
+        $event->data['current']['toc'] = array_merge($event->data['current']['toc'], $meta['toc']);
+        
+/*
+		
+		$data = array();
+		$data['internal'] = p_get_metadata( $template, 'internal', METADATA_RENDER_UNLIMITED );
+		$data['toc'] = p_get_metadata( $template, 'toc', METADATA_RENDER_UNLIMITED );
+
+        unset($cache_metadata[$ID]);
+        p_set_metadata( $ID, $data );
+        p_read_metadata( $ID, true );
+        $INFO['meta'] = p_get_metadata($ID, null, METADATA_RENDER_UNLIMITED);
+*/
 		return true;
     }
 
-    private function resolve_template() {
+    private function resolve_template( $templater = array() ) {
 		global $INFO;
+		
+		$page = empty($INFO['meta']['templater']['page']) ? $templater['page'] : $INFO['meta']['templater']['page'];
 		
 		// are we in an avtive Namespace?
 		$namespace = $this->_getActiveNamespace();
-		if (!$namespace && empty($INFO['meta']['templater']['page'])) { return; }
+		
+		if (!$namespace && empty( $page ) ) { return; }
 		
 		// check for the template
-		return empty ($INFO['meta']['templater']['page']) ? resolve_id($namespace, $this->getConf('templater_page')) : $INFO['meta']['templater']['page'];
+		return empty( $page ) ? resolve_id($namespace, $this->getConf('templater_page')) : $page;
     }
     
     function _getActiveNamespace() {
     	global $ID;
     	global $INFO;
     	
-		if (!$INFO['exists'])
-			return false;
+// Removed on 2016-09-14
+//		if (!$INFO['exists'])
+//			return false;
 		
     	$pattern = $this->getConf('excluded_pages');
 		if (strlen($pattern) > 0 && preg_match($pattern, $ID)) {
