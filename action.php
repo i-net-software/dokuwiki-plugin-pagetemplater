@@ -86,7 +86,12 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 		if ( empty( $template) || in_array($template, array( $id, $event->data['page']) ) ) { return true; }
 
         $meta = p_get_metadata( $template, '', METADATA_RENDER_UNLIMITED );
+        
+        
+        if ( !$event->data['current']['internal'] || !is_array($event->data['current']['internal']) ) $event->data['current']['internal'] = array();
         $event->data['current']['internal'] = array_merge($event->data['current']['internal'], $meta['internal']);
+
+        if ( !$event->data['current']['toc'] || !is_array($event->data['current']['toc']) ) $event->data['current']['toc'] = array();
         $event->data['current']['toc'] = array_merge($event->data['current']['toc'], $meta['toc']);
         
 /*
