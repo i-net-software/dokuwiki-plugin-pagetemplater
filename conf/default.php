@@ -10,4 +10,3 @@
 
 $conf['enabled_namespaces'] = '';
 $conf['excluded_pages'] = '';
-$conf['templater_page'] = '';

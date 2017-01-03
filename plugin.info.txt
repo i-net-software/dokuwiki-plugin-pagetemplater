@@ -3,7 +3,7 @@
 base   pagetemplater
 author i-net software
 email  tools@inetsoftware.de
-date   2016-09-15
+date   2017-01-03
 name   Page Templater Plugin
 desc   Select Template Pages for your Content.
 url    https://github.com/i-net-software/dokuwiki-plugin-pagetemplater

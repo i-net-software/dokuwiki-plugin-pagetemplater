@@ -8,6 +8,5 @@
  * @author     Gerry Weissbach <gweissbach@inetsoftware.de>
  */
 
-$meta['enabled_namespaces'] = array('string');
+$meta['enabled_namespaces'] = array('');
 $meta['excluded_pages'] = array('string');
-$meta['templater_page'] = array('string');

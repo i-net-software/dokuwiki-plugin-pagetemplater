@@ -41,7 +41,7 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
     }
 
     function handle_content_display(& $event, $params) {
-		global $ACT, $INFO, $TOC;
+		global $ACT, $INFO, $TOC, $ID;
 		
 		$template = $this->resolve_template();
 		if ( !$template || $ACT != 'show' ) { return; }
@@ -53,6 +53,8 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 		$replace = $INFO['meta']['templater'];
 		unset($replace['page']);
 		$replace['content'] = $event->data;
+		$replace['page'] = $ID;
+		$replace['namespace'] = getNS($ID);
 
 		$new = $template;
 		foreach (array_keys($replace) as $key) {
@@ -114,12 +116,12 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 		$page = empty($INFO['meta']['templater']['page']) ? $templater['page'] : $INFO['meta']['templater']['page'];
 		
 		// are we in an avtive Namespace?
-		$namespace = $this->_getActiveNamespace();
+		$template = $this->_getActiveNamespace();
 		
-		if (!$namespace && empty( $page ) ) { return; }
+		if (!$template && empty( $page ) ) { return; }
 		
 		// check for the template
-		return empty( $page ) ? resolve_id($namespace, $this->getConf('templater_page')) : $page;
+		return empty( $page ) ? $template : $page;
     }
     
     function _getActiveNamespace() {
@@ -135,17 +137,31 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 			return false;
 		}
 
-        $namespaces = explode(',', $this->getConf('enabled_namespaces'));
-        foreach ($namespaces as $namespace) {
-			$namespace = cleanID($namespace);
-            if (trim($namespace) && (strpos($ID, $namespace . ':') === 0)) {
-                return $namespace;
+        $this->loadPages();
+        foreach ($this->pages as $namespace) {
+			$space = cleanID($namespace[0]);
+            if (trim($space) && (strpos($ID, $space . ':') === 0)) {
+                return resolve_id($namespace[0], $namespace[1]);
             }
         }
 
         return false;
     }
 
+    private static $pages = null;
+    private function loadPages() {
+        if ( $this->pages != null ) {
+            return;
+        }
+        
+        $this->pages = array();
+        $namespaces = explode("\n", $this->getConf('enabled_namespaces'));
+        foreach( $namespaces as $namespace ) {
+            
+            if ( strlen(trim($namespace)) == 0 ) { continue; }
+            $this->pages[] = explode("=>", $namespace);
+        }
+    }
 }
 
 //Setup VIM: ex: et ts=4 enc=utf-8 :
