@@ -61,7 +61,10 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 			if ( $new != $template ) { $template = $new; }
 			if ( $key != 'content' && substr($key, 0, 1) == '!' ) {
 				$rkey = substr($key, 1);
-				$replace[$key] = p_render('xhtml', p_get_instructions($replace[$key]),$info);
+                
+                // When rendering the instructions, there will always be a doc_start/doc_end and another p_open/p_close block. We do not want them.				
+				$instructions = array_slice(p_get_instructions($replace[$key]), 2, -2);
+				$replace[$key] = p_render('xhtml', $instructions ,$info);
 			} else { $rkey = $key; }
 			$new = str_replace('@@' . strtoupper(trim($rkey)) . '@@', $replace[$key], $template);
 			$new = str_replace(urlencode('@@') . strtoupper(trim($rkey)) . urlencode('@@'), $replace[$key], $new);
