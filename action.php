@@ -94,7 +94,7 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
         $event->data['current']['internal'] = array_merge($event->data['current']['internal'], $meta['internal']);
 
         if ( !$event->data['current']['toc'] || !is_array($event->data['current']['toc']) ) $event->data['current']['toc'] = array();
-        $event->data['current']['toc'] = array_merge($event->data['current']['toc'], $meta['toc']);
+        $event->data['current']['toc'] = array_merge($event->data['current']['toc'], (array_key_exists('toc', $meta) && is_array($meta['toc'])?$meta['toc']:array()));
         
 /*
 		
