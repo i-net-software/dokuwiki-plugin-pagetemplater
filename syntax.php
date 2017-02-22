@@ -15,12 +15,6 @@ require_once(DOKU_PLUGIN.'syntax.php');
 
 class syntax_plugin_pagetemplater extends DokuWiki_Syntax_Plugin {
 
-    function getInfo(){
-        return array_merge(confToHash(dirname(__FILE__).'/info.txt'), array(
-				'name' => 'Page Templater Syntax Component',
-		));
-    }
-
     function getType() { return 'substition'; }
     function getPType() { return 'block'; }
     function getSort() { return 30; }

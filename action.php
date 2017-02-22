@@ -26,12 +26,6 @@ require_once(DOKU_INC . 'inc/pageutils.php');
 
 class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 
-    function getInfo(){
-        return array_merge(confToHash(dirname(__FILE__).'/info.txt'), array(
-                'name' => 'Page Templater Action Component',
-        ));
-    }
-
     /**
      * Register the eventhandlers.
      */
