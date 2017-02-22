@@ -28,8 +28,8 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 
     function getInfo(){
         return array_merge(confToHash(dirname(__FILE__).'/info.txt'), array(
-				'name' => 'Page Templater Action Component',
-		));
+                'name' => 'Page Templater Action Component',
+        ));
     }
 
     /**
@@ -41,108 +41,90 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
     }
 
     function handle_content_display(& $event, $params) {
-		global $ACT, $INFO, $TOC, $ID;
-		
-		$template = $this->resolve_template();
-		if ( !$template || $ACT != 'show' ) { return; }
-		
-		$oldtoc = $TOC;
-		$template = p_wiki_xhtml( $template );
+        global $ACT, $INFO, $TOC, $ID;
+        
+        $template = $this->resolve_template();
+        if ( !$template || $ACT != 'show' ) { return; }
+        
+        $oldtoc = $TOC;
+        $template = p_wiki_xhtml( $template );
 
-		// set the replacements
-		$replace = $INFO['meta']['templater'];
-		unset($replace['page']);
-		$replace['content'] = $event->data;
-		$replace['page'] = $ID;
-		$replace['namespace'] = getNS($ID);
+        // set the replacements
+        $replace = $INFO['meta']['templater'];
+        unset($replace['page']);
+        $replace['content'] = $event->data;
+        $replace['page'] = $ID;
+        $replace['namespace'] = getNS($ID);
 
-		$new = $template;
-		foreach (array_keys($replace) as $key) {
-			if ( $new != $template ) { $template = $new; }
-			if ( $key != 'content' && substr($key, 0, 1) == '!' ) {
-				$rkey = substr($key, 1);
-                
-                // When rendering the instructions, there will always be a doc_start/doc_end and another p_open/p_close block. We do not want them.				
-				$instructions = array_slice(p_get_instructions($replace[$key]), 2, -2);
-				$replace[$key] = p_render('xhtml', $instructions ,$info);
-			} else { $rkey = $key; }
-			$new = str_replace('@@' . strtoupper(trim($rkey)) . '@@', $replace[$key], $template);
-			$new = str_replace(urlencode('@@') . strtoupper(trim($rkey)) . urlencode('@@'), $replace[$key], $new);
-		}
-		
-		if ( $new != $event->data ) {
-			$event->data = $new;
-		}
-		
-		$TOC = $oldtoc;
+        $new = $template;
+        foreach (array_keys($replace) as $key) {
+            if ( $new != $template ) { $template = $new; }
+            if ( $key != 'content' && substr($key, 0, 1) == '!' ) {
+                $rkey = substr($key, 1);
+                $replace[$key] = p_render('xhtml', p_get_instructions($replace[$key]),$info);
+            } else { $rkey = $key; }
+            $new = str_replace('@@' . strtoupper(trim($rkey)) . '@@', $replace[$key], $template);
+            $new = str_replace(urlencode('@@') . strtoupper(trim($rkey)) . urlencode('@@'), $replace[$key], $new);
+        }
+        
+        if ( $new != $event->data ) {
+            $event->data = $new;
+        }
+        
+        $TOC = $oldtoc;
 
-		$data = array('xhtml',& $event->data);
+        $data = array('xhtml',& $event->data);
         trigger_event('RENDERER_CONTENT_POSTPROCESS',$data);
-				
-		return true;
+                
+        return true;
     }
     
     function handle_meta_data(& $event, $params) {
-		global $ACT;
+        global $ACT;
 
         $id = getId();
         if ( $id != $event->data['page'] ) { return true; }
-		$template = $this->resolve_template( $event->data['current']['templater'] );
-		if ( empty( $template) || in_array($template, array( $id, $event->data['page']) ) ) { return true; }
+        $template = $this->resolve_template( $event->data['current']['templater'] );
+        if ( empty( $template) || in_array($template, array( $id, $event->data['page']) ) ) { return true; }
 
         $meta = p_get_metadata( $template, '', METADATA_RENDER_UNLIMITED );
         
         
         if ( !$event->data['current']['internal'] || !is_array($event->data['current']['internal']) ) $event->data['current']['internal'] = array();
+        if ( !is_array($meta['internal']) ) $meta['internal'] = array();
         $event->data['current']['internal'] = array_merge($event->data['current']['internal'], $meta['internal']);
 
         if ( !$event->data['current']['toc'] || !is_array($event->data['current']['toc']) ) $event->data['current']['toc'] = array();
-        $event->data['current']['toc'] = array_merge($event->data['current']['toc'], (array_key_exists('toc', $meta) && is_array($meta['toc'])?$meta['toc']:array()));
-        
-/*
-		
-		$data = array();
-		$data['internal'] = p_get_metadata( $template, 'internal', METADATA_RENDER_UNLIMITED );
-		$data['toc'] = p_get_metadata( $template, 'toc', METADATA_RENDER_UNLIMITED );
+        if ( !is_array($meta['toc']) ) $meta['toc'] = array();
+        $event->data['current']['toc'] = array_merge($event->data['current']['toc'], $meta['toc']);
 
-        unset($cache_metadata[$ID]);
-        p_set_metadata( $ID, $data );
-        p_read_metadata( $ID, true );
-        $INFO['meta'] = p_get_metadata($ID, null, METADATA_RENDER_UNLIMITED);
-*/
-		return true;
+        return true;
     }
 
     private function resolve_template( $templater = array() ) {
-		global $INFO;
-		
-		$page = empty($INFO['meta']['templater']['page']) ? $templater['page'] : $INFO['meta']['templater']['page'];
-		
-		// are we in an avtive Namespace?
-		$template = $this->_getActiveNamespace();
-		
-		if (!$template && empty( $page ) ) { return; }
-		
-		// check for the template
-		return empty( $page ) ? $template : $page;
+        global $INFO;
+        
+        $page = empty($INFO['meta']['templater']['page']) ? $templater['page'] : $INFO['meta']['templater']['page'];
+        
+        // are we in an avtive Namespace?
+        $template = $this->_getActiveNamespace();
+        if ( !$template && empty( $page ) ) return;
+
+        return empty( $page ) ? $template : $page;
     }
     
     function _getActiveNamespace() {
-    	global $ID;
-    	global $INFO;
-    	
-// Removed on 2016-09-14
-//		if (!$INFO['exists'])
-//			return false;
-		
-    	$pattern = $this->getConf('excluded_pages');
-		if (strlen($pattern) > 0 && preg_match($pattern, $ID)) {
-			return false;
-		}
+        global $ID;
+        global $INFO;
+        
+        $pattern = $this->getConf('excluded_pages');
+        if (strlen($pattern) > 0 && preg_match($pattern, $ID)) {
+            return false;
+        }
 
         $this->loadPages();
         foreach ($this->pages as $namespace) {
-			$space = cleanID($namespace[0]);
+            $space = cleanID($namespace[0]);
             if (trim($space) && (strpos($ID, $space . ':') === 0)) {
                 return resolve_id($namespace[0], $namespace[1]);
             }
