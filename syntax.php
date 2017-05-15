@@ -25,12 +25,12 @@ class syntax_plugin_pagetemplater extends DokuWiki_Syntax_Plugin {
 
     function handle($match, $state, $pos, Doku_Handler $handler) {
 
-		return true;
+        return true;
     }            
-	
+    
     function render($mode, Doku_Renderer $renderer, $data) {
-		$renderer->doc .= "@@CONTENT@@";
-		return true;
-	}
+        $renderer->doc .= "@@CONTENT@@";
+        return true;
+    }
 }
 // vim:ts=4:sw=4:et:enc=utf-8: 
