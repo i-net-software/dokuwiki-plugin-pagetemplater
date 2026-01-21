@@ -96,7 +96,12 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
     private function resolve_template( $templater = array() ) {
         global $INFO;
         
-        $page = empty($INFO['meta']['templater']['page']) ? $templater['page'] : $INFO['meta']['templater']['page'];
+        $page = '';
+        if (isset($INFO['meta']['templater']['page']) && !empty($INFO['meta']['templater']['page'])) {
+            $page = $INFO['meta']['templater']['page'];
+        } elseif (isset($templater['page']) && !empty($templater['page'])) {
+            $page = $templater['page'];
+        }
         
         // are we in an avtive Namespace?
         $template = $this->_getActiveNamespace();
@@ -115,10 +120,10 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
         }
 
         $this->loadPages();
-        foreach ($this->pages as $namespace) {
+        foreach (self::$pages as $namespace) {
             $space = cleanID($namespace[0]);
             if (trim($space) && (strpos($ID, $space . ':') === 0)) {
-                return resolve_id($namespace[0], $namespace[1]);
+                return resolve_id($namespace[0], isset($namespace[1]) ? $namespace[1] : '');
             }
         }
 
@@ -127,16 +132,16 @@ class action_plugin_pagetemplater extends DokuWiki_Action_Plugin {
 
     private static $pages = null;
     private function loadPages() {
-        if ( $this->pages != null ) {
+        if ( self::$pages != null ) {
             return;
         }
         
-        $this->pages = array();
+        self::$pages = array();
         $namespaces = explode("\n", $this->getConf('enabled_namespaces'));
         foreach( $namespaces as $namespace ) {
             
             if ( strlen(trim($namespace)) == 0 ) { continue; }
-            $this->pages[] = explode("=>", $namespace);
+            self::$pages[] = explode("=>", $namespace);
         }
     }
 }
